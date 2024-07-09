@@ -9,11 +9,11 @@ import java.util.Set;
 public interface UserService {
     UserResponse registerUser(UserRequest userRequest);
 
-    UserResponse findById(Long id);
+    UserResponse findById(Long userId);
 
-    UserResponse updateUser(UserRequest userRequest, Long id);
+    UserResponse updateUser(UserRequest userRequest, Long userId);
 
-    void delUser(Long id);
+    void delUser(Long userId);
 
     Set<Recipe> getAllRecipeForUser(Long userId);
 

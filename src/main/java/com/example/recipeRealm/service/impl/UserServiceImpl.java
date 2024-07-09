@@ -47,18 +47,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse findById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new RecordNotFoundException(String.format("User with id %S not found", id)));
+    public UserResponse findById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new RecordNotFoundException(String.format("User with id %S not found", userId)));
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user, userResponse);
         return userResponse;
     }
 
     @Override
-    public UserResponse updateUser(UserRequest userRequest, Long id) {
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new RecordNotFoundException(String.format("User with id %S not found", id)));
+    public UserResponse updateUser(UserRequest userRequest, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new RecordNotFoundException(String.format("User with id %S not found", userId)));
         Optional<User> existingUser = userRepository.findByEmail(userRequest.getEmail());
         if (existingUser.isPresent()) {
             throw new EmailAlreadyExistException(String.format("This email %s is already taken", userRequest.getEmail()));
@@ -73,8 +73,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delUser(Long id) {
-        userRepository.deleteById(id);
+    public void delUser(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RecordNotFoundException(String.format("Recipe with id %s not found", userId)));
+        userRepository.deleteById(userId);
     }
 
     @Override

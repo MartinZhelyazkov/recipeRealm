@@ -71,6 +71,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public void delRecipe(Long recipeId) {
+        recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new RecordNotFoundException(String.format("Recipe with id %s not found", recipeId)));
         recipeRepository.deleteById(recipeId);
     }
 

@@ -59,6 +59,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void delComment(Long commentId) {
+        commentRepository.findById(commentId)
+                .orElseThrow(() -> new RecordNotFoundException(String.format("Comment with id %s not found", commentId)));
         commentRepository.deleteById(commentId);
     }
 

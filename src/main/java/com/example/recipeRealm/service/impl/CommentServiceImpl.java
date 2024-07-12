@@ -26,11 +26,14 @@ public class CommentServiceImpl implements CommentService {
 
     private final RecipeRepository recipeRepository;
 
+    private final CurrentUserService currentUserService;
+
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, CommentConverter commentConverter, RecipeRepository recipeRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, CommentConverter commentConverter, RecipeRepository recipeRepository, CurrentUserService currentUserService) {
         this.commentRepository = commentRepository;
         this.commentConverter = commentConverter;
         this.recipeRepository = recipeRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -59,8 +62,13 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void delComment(Long commentId) {
-        commentRepository.findById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RecordNotFoundException(String.format("Comment with id %s not found", commentId)));
+        boolean canDelete = currentUserService.isCurrentUserMatch(comment.getAuthor());
+        canDelete |= currentUserService.isCurrentUserARole("ROLE_MODERATOR");
+        if (!canDelete) {
+            throw new RecordNotFoundException("This user can't delete this comment");
+        }
         commentRepository.deleteById(commentId);
     }
 

@@ -16,6 +16,5 @@ public class UserResponse {
     private LocalDateTime createdAt;
     private Set<Recipe> recipes;
     private Set<Recipe> favoriteRecipes;
-    //private String jwt;
 }
 

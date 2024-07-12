@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -39,6 +40,7 @@ public class RecipeController {
                     , schema = @Schema(implementation = Recipe.class)))
     })
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_USER')")
     ResponseEntity<RecipeResponse> addRecipe(@Valid @RequestBody RecipeRequest recipeRequest, @RequestParam Long userId) {
         return new ResponseEntity<>(recipeService.addRecipe(recipeRequest, userId), HttpStatus.CREATED);
     }
@@ -58,6 +60,7 @@ public class RecipeController {
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @Operation(summary = "Updating recipe")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Recipe successfully updated"
@@ -84,6 +87,7 @@ public class RecipeController {
                     , content = @Content(mediaType = "application/json"
                     , schema = @Schema(implementation = Recipe.class)))})
     @DeleteMapping
+    @PreAuthorize("hasRole('ROLE_USER')")
     void delRecipe(@RequestParam Long recipeId) {
         recipeService.delRecipe(recipeId);
     }

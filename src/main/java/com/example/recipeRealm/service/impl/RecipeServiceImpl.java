@@ -26,11 +26,14 @@ public class RecipeServiceImpl implements RecipeService {
 
     private final UserRepository userRepository;
 
+    private final CurrentUserService currentUserService;
+
     @Autowired
-    public RecipeServiceImpl(RecipeRepository recipeRepository, RecipeConverter recipeConverter, UserRepository userRepository) {
+    public RecipeServiceImpl(RecipeRepository recipeRepository, RecipeConverter recipeConverter, UserRepository userRepository, CurrentUserService currentUserService) {
         this.recipeRepository = recipeRepository;
         this.recipeConverter = recipeConverter;
         this.userRepository = userRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -40,6 +43,11 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe recipe = recipeConverter.toRecipe(recipeRequest);
         recipe.setAuthor(user);
         Recipe saveRecipe = recipeRepository.save(recipe);
+        boolean canAddRecipe = currentUserService.isCurrentUserMatch(recipe.getAuthor());
+        canAddRecipe |= currentUserService.isCurrentUserARole("ROLE_ADMIN");
+        if (!canAddRecipe) {
+            throw new RecordNotFoundException("This user can't add recipe");
+        }
         RecipeResponse recipeResponse = new RecipeResponse();
         BeanUtils.copyProperties(saveRecipe, recipeResponse);
         return recipeResponse;
@@ -58,6 +66,11 @@ public class RecipeServiceImpl implements RecipeService {
     public RecipeResponse updateRecipe(RecipeRequest recipeRequest, Long recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RecordNotFoundException(String.format("Recipe with id %s not found", recipeId)));
+        boolean canUpdateRecipe = currentUserService.isCurrentUserMatch(recipe.getAuthor());
+        canUpdateRecipe |= currentUserService.isCurrentUserARole("ROLE_ADMIN");
+        if (!canUpdateRecipe) {
+            throw new RecordNotFoundException("This user can't update this recipe");
+        }
         recipe.setDescription(recipeRequest.getDescription());
         recipe.setIngredients(recipeRequest.getIngredients());
         recipe.setInstructions(recipeRequest.getInstructions());
@@ -71,8 +84,13 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public void delRecipe(Long recipeId) {
-        recipeRepository.findById(recipeId)
+        Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RecordNotFoundException(String.format("Recipe with id %s not found", recipeId)));
+        boolean canDeleteRecipe = currentUserService.isCurrentUserMatch(recipe.getAuthor());
+        canDeleteRecipe |= currentUserService.isCurrentUserARole("ROLE_ADMIN");
+        if (!canDeleteRecipe) {
+            throw new RecordNotFoundException("This user can't delete this recipe");
+        }
         recipeRepository.deleteById(recipeId);
     }
 

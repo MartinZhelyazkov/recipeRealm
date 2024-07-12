@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -62,6 +63,7 @@ public class CommentController {
                     , content = @Content(mediaType = "application/json"
                     , schema = @Schema(implementation = Comment.class)))})
     @DeleteMapping
+    @PreAuthorize("hasRole('ROLE_USER')")
     void delComment(@RequestParam Long commentId) {
         commentService.delComment(commentId);
     }
